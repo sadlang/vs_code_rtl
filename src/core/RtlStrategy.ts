@@ -14,6 +14,13 @@ export interface RtlStrategy {
   readonly displayName: string;
 
   /**
+   * هل يبقى أثر الاستراتيجية بعد إعادة تحميل النافذة؟
+   * - `true` لاستراتيجيات تكتب على القرص (cssInjection).
+   * - `false` لاستراتيجيات وقت التشغيل (webview) — تُعاد فتحها عند الإقلاع.
+   */
+  readonly survivesReload: boolean;
+
+  /**
    * تفعيل RTL وفق الخيارات المعطاة.
    * @returns نتيجة العملية مع رسالة اختيارية للمستخدم.
    */
@@ -32,6 +39,8 @@ export interface RtlOptions {
   readonly scope: 'workbench' | 'all';
   /** إبقاء منطقة المحرّر باتجاه LTR. */
   readonly keepEditorLtr: boolean;
+  /** إخفاء الهيكل الأصليّ (شريط الأنشطة/الحالة) لإفساح المجال لسطح RTL (webview فقط). */
+  readonly hideNativeChrome?: boolean;
 }
 
 /** نتيجة عمليّة على استراتيجية. */

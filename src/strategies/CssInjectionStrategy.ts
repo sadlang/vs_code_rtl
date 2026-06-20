@@ -18,6 +18,7 @@ export const BACKUP_SUFFIX = '.vscode-rtl.bak';
 export class CssInjectionStrategy implements RtlStrategy {
   readonly id = 'cssInjection';
   readonly displayName = 'حقن CSS في واجهة العمل';
+  readonly survivesReload = true;
 
   constructor(private readonly targetProvider: TargetProvider) {}
 

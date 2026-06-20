@@ -2,7 +2,7 @@
   "name": "vs-code-rtl",
   "displayName": "VS Code RTL",
   "description": "تحويل واجهة VS Code إلى وضع من اليمين إلى اليسار (RTL) عبر نظام استراتيجيات قابل للتوسّع.",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "sadlang",
   "license": "MIT",
   "engines": {
@@ -54,14 +54,21 @@
       "properties": {
         "vsCodeRtl.strategy": {
           "type": "string",
-          "default": "cssInjection",
+          "default": "webview",
           "enum": [
+            "webview",
             "cssInjection"
           ],
           "enumDescriptions": [
-            "حقن CSS في واجهة VS Code (يتطلّب إعادة تحميل النافذة)."
+            "سطح RTL أصليّ داخل لوحة webview — آمن، لا يعدّل ملفّات التثبيت ويصمد عبر التحديثات (مُوصى به).",
+            "متقدّم: حقن CSS في ملفّ واجهة VS Code (يتطلّب إعادة تحميل النافذة وصلاحيّة كتابة على مجلّد التثبيت، وقد يُلغى عند التحديث)."
           ],
           "description": "الاستراتيجية المستخدمة لتطبيق RTL."
+        },
+        "vsCodeRtl.hideNativeChrome": {
+          "type": "boolean",
+          "default": false,
+          "description": "عند استخدام استراتيجية webview: إخفاء شريط الأنشطة وشريط الحالة الأصليّين (عبر إعدادات رسميّة قابلة للعكس) لإفساح المجال لسطح RTL."
         },
         "vsCodeRtl.keepEditorLtr": {
           "type": "boolean",

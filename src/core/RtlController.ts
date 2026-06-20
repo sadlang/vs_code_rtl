@@ -53,10 +53,13 @@ export class RtlController {
    * يُستخدم عند الإقلاع لاكتشاف محو التحديث للحقن.
    */
   async checkDrift(): Promise<DriftStatus> {
+    const strategy = this.resolveStrategy();
     const intended = this.state.isEnabled();
-    const actual = await this.isEnabled();
+    const actual = await strategy.isEnabled();
     if (intended && !actual) {
-      return 'drift';
+      // استراتيجية دائمة فُقد أثرها ⇒ انحراف يستدعي إعادة التطبيق؛
+      // استراتيجية وقت تشغيل ⇒ يُعاد فتحها تلقائيًّا عند الإقلاع.
+      return strategy.survivesReload ? 'drift' : 'reopen';
     }
     if (!intended && actual) {
       return 'stale';

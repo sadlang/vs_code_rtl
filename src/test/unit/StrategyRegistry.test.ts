@@ -7,6 +7,7 @@ function fakeStrategy(id: string): RtlStrategy {
   return {
     id,
     displayName: id,
+    survivesReload: true,
     enable: async () => ok,
     disable: async () => ok,
     isEnabled: async () => false,

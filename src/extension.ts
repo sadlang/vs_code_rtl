@@ -5,23 +5,36 @@ import { StrategyRegistry } from './core/StrategyRegistry';
 import { Settings } from './config/Settings';
 import { MementoState } from './state/MementoState';
 import { StatusBar } from './ui/StatusBar';
+import { LayoutManager } from './ui/LayoutManager';
 import { CssInjectionStrategy } from './strategies/CssInjectionStrategy';
+import { WebviewRtlStrategy } from './strategies/WebviewRtlStrategy';
 import { findWorkbenchCss } from './strategies/workbenchPaths';
 
 /**
  * يبني سجلّ الاستراتيجيات. نقطة التسجيل الوحيدة — أضف استراتيجياتك هنا.
+ * الاستراتيجية الآمنة (webview) أوّلًا لأنّها الافتراضيّة.
  */
 export function buildRegistry(): StrategyRegistry {
   const registry = new StrategyRegistry();
+  registry.register(new WebviewRtlStrategy(new LayoutManager()));
   registry.register(new CssInjectionStrategy(() => findWorkbenchCss(vscode.env.appRoot)));
   return registry;
 }
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
+  const registry = buildRegistry();
   const controller = new RtlController(
-    buildRegistry(),
+    registry,
     new Settings(),
     new MementoState(context.globalState),
+  );
+
+  context.subscriptions.push(
+    new vscode.Disposable(() => {
+      for (const s of registry.all()) {
+        (s as { dispose?: () => void }).dispose?.();
+      }
+    }),
   );
 
   const statusBar = new StatusBar();
@@ -62,11 +75,19 @@ export function deactivate(): void {
 }
 
 /**
- * عند الإقلاع: إن كان المستخدم قد فعّل RTL لكنّ تحديث VS Code محا الحقن،
- * يُقترح إعادة التطبيق.
+ * عند الإقلاع، حسب نوع الانحراف:
+ * - `reopen`: استراتيجية وقت-التشغيل (مثل webview) لا تصمد عبر إعادة التحميل،
+ *   فنُعيد فتحها بصمت لأنّ النيّة مفعّلة.
+ * - `drift`: استراتيجية تصمد (مثل حقن CSS) لكنّ تحديثًا محا أثرها — نقترح
+ *   إعادة التطبيق على المستخدم.
  */
 async function handleDrift(controller: RtlController): Promise<void> {
-  if ((await controller.checkDrift()) !== 'drift') {
+  const status = await controller.checkDrift();
+  if (status === 'reopen') {
+    await controller.enable();
+    return;
+  }
+  if (status !== 'drift') {
     return;
   }
   const reapply = 'إعادة التطبيق';

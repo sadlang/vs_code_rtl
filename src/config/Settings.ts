@@ -10,13 +10,14 @@ export class Settings {
   }
 
   get strategyId(): string {
-    return this.config.get<string>('strategy', 'cssInjection');
+    return this.config.get<string>('strategy', 'webview');
   }
 
   get options(): RtlOptions {
     return {
       scope: this.config.get<'workbench' | 'all'>('scope', 'workbench'),
       keepEditorLtr: this.config.get<boolean>('keepEditorLtr', true),
+      hideNativeChrome: this.config.get<boolean>('hideNativeChrome', false),
     };
   }
 }

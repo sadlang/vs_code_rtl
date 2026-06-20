@@ -15,12 +15,13 @@ class FakeState implements RtlState {
 }
 
 /** استراتيجية وهميّة بحالة قرص قابلة للضبط. */
-function fakeStrategy(diskEnabled: boolean, succeed = true): RtlStrategy {
+function fakeStrategy(diskEnabled: boolean, succeed = true, survivesReload = true): RtlStrategy {
   let enabled = diskEnabled;
   const result = (): RtlResult => ({ success: succeed, requiresReload: false, message: '' });
   return {
     id: 'cssInjection',
     displayName: 'fake',
+    survivesReload,
     enable: async () => {
       if (succeed) {
         enabled = true;
@@ -40,7 +41,10 @@ function fakeStrategy(diskEnabled: boolean, succeed = true): RtlStrategy {
 function controllerWith(strategy: RtlStrategy, state: RtlState): RtlController {
   const registry = new StrategyRegistry();
   registry.register(strategy);
-  const settings = { strategyId: 'cssInjection', options: { scope: 'workbench', keepEditorLtr: true } };
+  const settings = {
+    strategyId: strategy.id,
+    options: { scope: 'workbench', keepEditorLtr: true, hideNativeChrome: false },
+  };
   return new RtlController(registry, settings as never, state);
 }
 
@@ -68,9 +72,14 @@ describe('RtlController', () => {
   });
 
   describe('checkDrift', () => {
-    it('drift: النيّة تفعيل لكنّ القرص معطَّل', async () => {
-      const ctrl = controllerWith(fakeStrategy(false), new FakeState(true));
+    it('drift: النيّة تفعيل لكنّ الأثر مُحي (استراتيجية تصمد)', async () => {
+      const ctrl = controllerWith(fakeStrategy(false, true, true), new FakeState(true));
       assert.strictEqual(await ctrl.checkDrift(), 'drift');
+    });
+
+    it('reopen: النيّة تفعيل واستراتيجية لا تصمد عبر إعادة التحميل', async () => {
+      const ctrl = controllerWith(fakeStrategy(false, true, false), new FakeState(true));
+      assert.strictEqual(await ctrl.checkDrift(), 'reopen');
     });
 
     it('stale: النيّة تعطيل لكنّ القرص مفعَّل', async () => {
