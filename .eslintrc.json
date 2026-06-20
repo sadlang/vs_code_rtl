@@ -1,0 +1,36 @@
+{
+  "root": true,
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "@typescript-eslint"
+  ],
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "rules": {
+    "@typescript-eslint/naming-convention": [
+      "warn",
+      {
+        "selector": "import",
+        "format": [
+          "camelCase",
+          "PascalCase"
+        ]
+      }
+    ],
+    "@typescript-eslint/no-explicit-any": "warn",
+    "semi": "warn",
+    "curly": "warn",
+    "eqeqeq": "warn"
+  },
+  "ignorePatterns": [
+    "out",
+    "node_modules",
+    "**/*.d.ts"
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "name": "vs-code-rtl",
+  "displayName": "VS Code RTL",
+  "description": "تحويل واجهة VS Code إلى وضع من اليمين إلى اليسار (RTL) عبر نظام استراتيجيات قابل للتوسّع.",
+  "version": "0.1.0",
+  "publisher": "sadlang",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sadlang/vs_code_rtl.git"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "rtl",
+    "arabic",
+    "العربية",
+    "bidi",
+    "direction"
+  ],
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "vsCodeRtl.enable",
+        "title": "RTL: تفعيل وضع اليمين-لليسار",
+        "category": "VS Code RTL"
+      },
+      {
+        "command": "vsCodeRtl.disable",
+        "title": "RTL: تعطيل وضع اليمين-لليسار",
+        "category": "VS Code RTL"
+      },
+      {
+        "command": "vsCodeRtl.toggle",
+        "title": "RTL: تبديل وضع اليمين-لليسار",
+        "category": "VS Code RTL"
+      },
+      {
+        "command": "vsCodeRtl.reapply",
+        "title": "RTL: إعادة التطبيق (بعد تحديث VS Code)",
+        "category": "VS Code RTL"
+      }
+    ],
+    "configuration": {
+      "title": "VS Code RTL",
+      "properties": {
+        "vsCodeRtl.strategy": {
+          "type": "string",
+          "default": "cssInjection",
+          "enum": [
+            "cssInjection"
+          ],
+          "enumDescriptions": [
+            "حقن CSS في واجهة VS Code (يتطلّب إعادة تحميل النافذة)."
+          ],
+          "description": "الاستراتيجية المستخدمة لتطبيق RTL."
+        },
+        "vsCodeRtl.keepEditorLtr": {
+          "type": "boolean",
+          "default": true,
+          "description": "إبقاء منطقة تحرير الشيفرة (المحرّر) باتجاه LTR لتفادي قلب اتجاه الكود."
+        },
+        "vsCodeRtl.scope": {
+          "type": "string",
+          "default": "workbench",
+          "enum": [
+            "workbench",
+            "all"
+          ],
+          "enumDescriptions": [
+            "تطبيق RTL على واجهة العمل فقط (الأشرطة واللوحات).",
+            "تطبيق RTL على كامل الواجهة بما فيها المحرّر."
+          ],
+          "description": "نطاق تطبيق RTL."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "pretest": "npm run compile && npm run lint",
+    "test": "node ./out/test/runTest.js",
+    "test:unit": "mocha -r ts-node/register \"src/test/unit/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "@vscode/test-electron": "^2.3.9",
+    "eslint": "^8.56.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.3.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
+  }
+}
