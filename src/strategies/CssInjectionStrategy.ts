@@ -5,6 +5,9 @@ import { generateRtlCss, hasRtlCss, stripRtlCss } from './rtlCss';
 /** مُزوّد مسار ملفّ CSS المستهدَف — يُحقَن للسماح بالاختبار. */
 export type TargetProvider = () => string | undefined;
 
+/** لاحقة ملفّ النسخة الاحتياطية للحالة الأصليّة قبل أوّل حقن. */
+export const BACKUP_SUFFIX = '.vscode-rtl.bak';
+
 /**
  * استراتيجية تطبّق RTL بحقن كتلة CSS في ملفّ واجهة العمل الخاص بتثبيت
  * VS Code. تتطلّب صلاحيّة الكتابة على مجلّد التثبيت، وإعادة تحميل النافذة.
@@ -26,6 +29,7 @@ export class CssInjectionStrategy implements RtlStrategy {
     try {
       const original = await fs.readFile(target, 'utf8');
       const cleaned = stripRtlCss(original);
+      await this.backupOnce(target, cleaned);
       const block = generateRtlCss(options);
       await fs.writeFile(target, `${cleaned.trimEnd()}\n${block}\n`, 'utf8');
       return {
@@ -69,6 +73,19 @@ export class CssInjectionStrategy implements RtlStrategy {
       return hasRtlCss(content);
     } catch {
       return false;
+    }
+  }
+
+  /**
+   * يحفظ نسخة احتياطية من المحتوى الأصليّ (المنظَّف) مرّة واحدة فقط،
+   * كأمان إضافيّ في حال تلف الملفّ. لا يُكتب فوق نسخة موجودة.
+   */
+  private async backupOnce(target: string, cleanedContent: string): Promise<void> {
+    const backup = target + BACKUP_SUFFIX;
+    try {
+      await fs.access(backup);
+    } catch {
+      await fs.writeFile(backup, cleanedContent, 'utf8');
     }
   }
 

@@ -3,7 +3,7 @@ import * as os from 'os';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as fsp from 'fs/promises';
-import { CssInjectionStrategy } from '../../strategies/CssInjectionStrategy';
+import { CssInjectionStrategy, BACKUP_SUFFIX } from '../../strategies/CssInjectionStrategy';
 import { RtlOptions } from '../../core/RtlStrategy';
 
 const OPTIONS: RtlOptions = { scope: 'workbench', keepEditorLtr: true };
@@ -60,5 +60,19 @@ describe('CssInjectionStrategy', () => {
     const result = await strategy.enable(OPTIONS);
     assert.strictEqual(result.success, false);
     assert.strictEqual(await strategy.isEnabled(), false);
+  });
+
+  it('enable ينشئ نسخة احتياطية للمحتوى الأصليّ مرّة واحدة', async () => {
+    const strategy = new CssInjectionStrategy(() => tmpFile);
+    const backup = tmpFile + BACKUP_SUFFIX;
+    await strategy.enable(OPTIONS);
+    assert.ok(fs.existsSync(backup), 'لم تُنشأ النسخة الاحتياطية');
+    const backupContent = await fsp.readFile(backup, 'utf8');
+    assert.match(backupContent, /\.original/);
+    assert.doesNotMatch(backupContent, /vs-code-rtl: BEGIN/);
+
+    // إعادة التفعيل لا تكتب فوق النسخة الأصليّة.
+    await strategy.enable(OPTIONS);
+    assert.strictEqual(await fsp.readFile(backup, 'utf8'), backupContent);
   });
 });
